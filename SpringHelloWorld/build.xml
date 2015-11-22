@@ -1,0 +1,104 @@
+<?xml version="1.0"?>
+
+<project name="SpringHelloWorld" basedir="." >
+    <property file="build.properties"/>
+	
+    <property name="src.dir" value="src"/>
+	<property name="build" value="build"/>	
+	<property name="appserver.home" value="D:/Istudi/Eclipse_Workspace/Struts2Example/SpringHelloWorld/build"/>	
+	<property name="deploy.path" value="${appserver.home}"/>	
+	<property name="web.dir" value="webapps"/>
+	<property name="dist"  location="dist"/>
+    <property name="build.dir" value="${web.dir}/WEB-INF/classes"/>
+    <property name="name" value="SpringHelloWorld"/>
+	<property name="domain.home" value="C:/Oracle/Middleware/user_projects/domains/base_domain/applications/${name}"/>
+	<property name="appdeploy.path" value="${domain.home}"/>	
+
+	<target name="init">
+	    <tstamp/>
+	    <mkdir dir="${build.dir}"/>
+	  </target>
+
+	  <target name="compile" depends="init" >
+	    <javac srcdir="${src.dir}" destdir="${build.dir}"/>
+	  </target>
+
+	 
+
+	  <target name="clean" >
+	    <delete dir="${build.dir}"/>
+	    <delete dir="${dist}"/>
+	  </target>
+
+	
+    <path id="master-classpath">
+        <fileset dir="${web.dir}/WEB-INF/lib">
+            <include name="*.jar"/>
+        </fileset>
+       
+        <!-- <fileset dir="${appserver.home}/common/lib">
+            <include name="servlet-api.jar"/>
+        </fileset> -->
+        <pathelement path="${build.dir}"/>
+    </path>
+
+
+    <target name="build" depends="clean" description="Compile main source tree java files">
+        <mkdir dir="${build.dir}"/>
+        <javac destdir="${build.dir}" target="1.6" debug="true"
+               deprecation="false" optimize="false" failonerror="true">
+            <src path="${src.dir}"/>
+            <classpath refid="master-classpath"/>
+        </javac>
+    </target>
+
+    
+    
+    <target name="undeploy" description="Un-Deploy application">
+        <delete>
+            <fileset dir="${deploy.path}/${name}">
+                <include name="**/*.*"/>
+            </fileset>
+        </delete>
+    </target>
+    <target name="deploy" depends="build" description="Deploy application">
+        <copy todir="${deploy.path}/${name}" preservelastmodified="true">
+            <fileset dir="${web.dir}">
+                <include name="**/*.*"/>
+                <exclude name="**/*.html"/>
+            </fileset>
+        </copy>
+    </target>
+
+    <target name="deploywar" depends="build" description="Deploy application as a WAR file">
+        <war destfile="${build}/${name}.war"
+             webxml="${web.dir}/WEB-INF/web.xml">
+            <fileset dir="${web.dir}">
+                <include name="**/*.*"/>
+                <exclude name="**/*.html"/>
+            </fileset>
+        </war>
+        <copy todir="${deploy.path}" preservelastmodified="true">
+            <fileset dir="${build}/.">
+                <include name="*.war"/>
+            </fileset>
+        </copy>
+    	
+    	  <delete>
+    	            <fileset dir="${appdeploy.path}">
+    	                <include name="**/*.*"/>
+    	            </fileset>
+    	        </delete>
+    	
+    	  <copy todir="${appdeploy.path}" preservelastmodified="true">
+    	            <fileset dir="${build}/.">
+    	                <include name="*.war"/>
+    	            </fileset>
+    	        </copy>
+    	
+    </target>
+
+   
+ 
+
+</project>
